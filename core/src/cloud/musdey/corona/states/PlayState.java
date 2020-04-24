@@ -2,36 +2,37 @@ package cloud.musdey.corona.states;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.Array;
-import com.badlogic.gdx.utils.viewport.ScreenViewport;
-
 import cloud.musdey.corona.CoronaGame;
 import cloud.musdey.corona.sprites.Player;
 import cloud.musdey.corona.sprites.Tube;
 
 public class PlayState extends State {
 
-    private static final float ASPECT_RATIO =
-            (float)CoronaGame.WIDTH/(float)CoronaGame.HEIGHT;
+    /*    public static final int WIDTH = 450;
+    public static final int HEIGHT = 800;*/
 
     private enum GameState{
         Running,Paused
     }
     private int points;
 
-    private static final int TUBE_SPACING = 125;
+    final float GAME_WORLD_WIDTH = 36;
+    final float GAME_WORLD_HEIGHT = 16;
+    private static final int TUBE_SPACING = 100;
     private static final int TUBE_COUNT = 4;
-    private static final int GROUND_Y_OFFSET = -50;
+    private static final int GROUND_Y_OFFSET = -20;
 
     GameState state = GameState.Running;
 
     private Player player;
-    private Texture background,ground;
+    private Sprite ground;
+    private Sprite backGroundSprite;
     private Tube tube;
 
     private Array<Tube> tubes;
@@ -40,14 +41,24 @@ public class PlayState extends State {
     private Hud hud;
     private SpriteBatch spriteBatch;
 
+
     public PlayState(GameStateManager gsm) {
         super(gsm);
-        player = new Player(50,300);
-        tube = new Tube(100);
-        cam.setToOrtho(false, CoronaGame.WIDTH/2,CoronaGame.HEIGHT/2);
 
-        background = new Texture("bg.png");
-        ground = new Texture("ground.png");
+        float aspectRatio = (float)Gdx.graphics.getHeight()/(float)Gdx.graphics.getWidth();
+
+        cam.setToOrtho(false,GAME_WORLD_HEIGHT*aspectRatio,GAME_WORLD_HEIGHT);
+        cam.position.set(GAME_WORLD_WIDTH/2,GAME_WORLD_HEIGHT/2,0);
+
+        backGroundSprite = new Sprite(new Texture("bg.png"));
+        backGroundSprite.setSize(GAME_WORLD_WIDTH,GAME_WORLD_HEIGHT);
+
+        player = new Player(1,4);
+        tube = new Tube(50);
+
+        ground = new Sprite(new Texture("ground.png"));
+        ground.setSize(100,10);
+        ground.setPosition(cam.position.x - cam.viewportWidth/2,GROUND_Y_OFFSET);
         groundPos1 = new Vector2(cam.position.x - cam.viewportWidth/2,GROUND_Y_OFFSET);
         groundPos2 = new Vector2((cam.position.x - cam.viewportWidth/2)+ground.getWidth(),GROUND_Y_OFFSET);
 
@@ -62,7 +73,7 @@ public class PlayState extends State {
 
     private void setupHUD(){
         spriteBatch = new SpriteBatch();
-        hud = new Hud(spriteBatch);
+        //hud = new Hud(spriteBatch,new);
         Gdx.input.setInputProcessor(hud.getStage());
         hud.playButton.addListener(new ClickListener(){
             @Override
@@ -90,12 +101,12 @@ public class PlayState extends State {
     public void update(float dt) {
         if(state == GameState.Running) {
             handleInput();
-            updateGround();
+        /*      updateGround();
             player.update(dt);
 
             cam.position.x = player.getPosition().x + 80;
 
-            for (int i = 0; i < tubes.size; i++) {
+          for (int i = 0; i < tubes.size; i++) {
                 Tube tube = tubes.get(i);
                 if (cam.position.x - cam.viewportWidth / 2 > tube.getPosTopTube().x + tube.getTopTube().getWidth()) {
                     tube.reposition(tube.getPosTopTube().x + ((Tube.TUBE_WIDTH + TUBE_SPACING) * TUBE_COUNT));
@@ -116,6 +127,7 @@ public class PlayState extends State {
                 endGame();
             }
             cam.update();
+         */
         }else{
             // don't update
         }
@@ -129,15 +141,18 @@ public class PlayState extends State {
     public void render(SpriteBatch sb) {
 
         sb.setProjectionMatrix(cam.combined);
+        cam.update();
         sb.begin();
-        sb.draw(background,cam.position.x - (cam.viewportWidth/2),0);
-        sb.draw(player.getPlayer(),player.getPosition().x,player.getPosition().y);
-        for(Tube tube : tubes){
+        backGroundSprite.draw(sb);
+        sb.draw(player.getPlayer(),player.getPosition().x,player.getPosition().y,1,1);
+/*        for(Tube tube : tubes){
             sb.draw(tube.getBottomTube(), tube.getPosBotTube().x, tube.getPosBotTube().y);
             sb.draw(tube.getTopTube(), tube.getPosTopTube().x, tube.getPosTopTube().y);
-        }
-        sb.draw(ground,groundPos1.x,groundPos1.y);
-        sb.draw(ground,groundPos2.x,groundPos2.y);
+        }*/
+        //sb.draw(ground,groundPos1.x,groundPos1.y);
+        //sb.draw(ground,groundPos2.x,groundPos2.y);
+        ground.draw(sb);
+
         sb.end();
 
         //Secondly draw the Hud
@@ -148,9 +163,9 @@ public class PlayState extends State {
 
     @Override
     public void dispose() {
-        background.dispose();
+        backGroundSprite.getTexture().dispose();
         player.dispose();
-        ground.dispose();
+        ground.getTexture().dispose();
         hud.dispose();
         for(Tube tube: tubes){
             tube.dispose();

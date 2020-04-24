@@ -11,8 +11,6 @@ import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 
-import java.awt.Menu;
-
 import cloud.musdey.corona.CoronaGame;
 
 public class GameMenuState extends State{
@@ -23,18 +21,22 @@ public class GameMenuState extends State{
     private Stage stage;
     private Skin skin;
 
-
     public GameMenuState(GameStateManager gsm){
         super(gsm);
-        cam.setToOrtho(false, CoronaGame.WIDTH/2,CoronaGame.HEIGHT/2);
-        background = new Texture("bg.png");
+        cam.setToOrtho(false,ExamplePlayState.VISIBLE_WIDTH,ExamplePlayState.VISIBLE_HEIGHT);
+        background = new Texture("bg_plain169.png");
         playBtn = new Texture("playbtn.png");
 
-        skin = new Skin(Gdx.files.internal("gdx-skins-master/comic/skin/comic-ui.json"));
+        skin = new Skin(Gdx.files.internal("skins/comic/skin/comic-ui.json"));
         setupMenu();
+        CoronaGame.adsController.showBannerAd();
     }
 
     private void setupMenu(){
+
+        int row_height = Gdx.graphics.getWidth() / 14;
+        int col_width = Gdx.graphics.getWidth() / 14;
+
         stage = new Stage(new ScreenViewport());
         Gdx.input.setInputProcessor(stage);
 
@@ -43,21 +45,34 @@ public class GameMenuState extends State{
         //table.setDebug(true);
         stage.addActor(table);
 
-        gameBtn = new TextButton("Try again",skin,"default");
-        highscoreBtn = new TextButton("Highscore",skin,"default");
-        exitBtn = new TextButton("Main menu",skin,"default");
+        gameBtn = new TextButton("Try Again",skin);
+        gameBtn.setSize(col_width*8,row_height*1.5f);
+        gameBtn.getLabel().setFontScale(1.5f);
+        highscoreBtn = new TextButton("Highscore",skin);
+        highscoreBtn.setSize(col_width*8,row_height*1.5f);
+        highscoreBtn.getLabel().setFontScale(1.5f);
+        exitBtn = new TextButton("Main Menu",skin);
+        exitBtn.setSize(col_width*8,row_height*1.5f);
+        exitBtn.getLabel().setFontScale(1.5f);
 
-        table.setPosition(CoronaGame.WIDTH/2,CoronaGame.HEIGHT/4);
-        table.add(gameBtn).fillX().uniformX();
-        table.row().pad(10, 0, 10, 0);
-        table.add(highscoreBtn).fillX().uniformX();
-        table.row();
-        table.add(exitBtn).fillX().uniformX();
+        table.setPosition(Gdx.graphics.getWidth()/2,row_height*3.0f);
+        table.add(gameBtn).width(gameBtn.getWidth()).height(gameBtn.getHeight());
+        table.row().pad(5, 0, 5, 0);
+        table.add(highscoreBtn).width(highscoreBtn.getWidth()).height(highscoreBtn.getHeight());
+        table.row().pad(0, 0, 5, 0);
+        table.add(exitBtn).width(exitBtn.getWidth()).height(exitBtn.getHeight());
+
 
         gameBtn.addListener(new ClickListener(){
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                gsm.set(new PlayState(gsm));
+                if(CoronaGame.GAMECOUNTER == 10){
+                    CoronaGame.adsController.showInterstitialAd();
+                    CoronaGame.GAMECOUNTER = 0;
+                }else{
+                    CoronaGame.GAMECOUNTER++;
+                    gsm.set(new ExamplePlayState(gsm));
+                }
             }
         });
 
@@ -91,11 +106,12 @@ public class GameMenuState extends State{
     public void render(SpriteBatch sb) {
         sb.setProjectionMatrix(cam.combined);
         sb.begin();
-        sb.draw(background,0,0, CoronaGame.WIDTH,CoronaGame.HEIGHT);
-        sb.draw(playBtn, cam.position.x - playBtn.getWidth()/2,cam.position.y);
+        sb.draw(background,0,0, ExamplePlayState.VISIBLE_WIDTH,ExamplePlayState.VISIBLE_HEIGHT);
+        //sb.draw(playBtn, cam.position.x - playBtn.getWidth()/2,cam.position.y);
+        sb.end();
+
         stage.act(Math.min(Gdx.graphics.getDeltaTime(), 1 / 30f));
         stage.draw();
-        sb.end();
     }
 
     @Override
@@ -103,5 +119,7 @@ public class GameMenuState extends State{
         background.dispose();
         stage.dispose();
         playBtn.dispose();
+        CoronaGame.adsController.hideBannerAd();
+        CoronaGame.adsController.hideInterstitialAd();
     }
 }

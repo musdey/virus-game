@@ -2,8 +2,11 @@ package cloud.musdey.corona.states;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
+import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.ImageButton;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
@@ -11,44 +14,66 @@ import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
+import com.badlogic.gdx.utils.viewport.FillViewport;
 import com.badlogic.gdx.utils.viewport.FitViewport;
+import com.badlogic.gdx.utils.viewport.Viewport;
+
+import javax.swing.JViewport;
 
 import cloud.musdey.corona.CoronaGame;
 
 public class Hud {
 
     private Stage stage;
-    private FitViewport stageViewport;
-    private Texture pauseIcon;
-    public ImageButton playButton;
-    private Label scoreLabel;
-    private Skin skin;
+    private FillViewport stageViewport;
+    private Texture playIcon,pauseIcon;
+    public ImageButton playButton,pauseButton;
 
-    public Hud(SpriteBatch spriteBatch) {
-        stageViewport = new FitViewport(CoronaGame.WIDTH,CoronaGame.HEIGHT);
-        stage = new Stage(stageViewport, spriteBatch); //create stage with the stageViewport and the SpriteBatch given in Constructor
-        skin = new Skin(Gdx.files.internal("gdx-skins-master/comic/skin/comic-ui.json"));
+    BitmapFont font;
+    FreeTypeFontGenerator generator;
 
-        scoreLabel = new Label("Score: 0",skin);
-        scoreLabel.setFontScale(1.5f);
-        pauseIcon = new Texture("playbtn.png");
-        Drawable drawable = new TextureRegionDrawable(new TextureRegion(pauseIcon));
-        playButton = new ImageButton(drawable);
+    private int score;
+    private Matrix4 normalProjection;
+
+    public Hud(SpriteBatch spriteBatch, Viewport viewport) {
+        stage = new Stage(viewport, spriteBatch);
+
+        generator = new FreeTypeFontGenerator(Gdx.files.internal("fonts/flightcorps/flightcorpsi.ttf"));
+        FreeTypeFontGenerator.FreeTypeFontParameter parameter = new FreeTypeFontGenerator.FreeTypeFontParameter();
+        parameter.size = 12;
+        font = generator.generateFont(parameter); // font size 12
+        generator.dispose();
+        normalProjection = new Matrix4().setToOrtho2D(0, 0, Gdx.graphics.getWidth(),  Gdx.graphics.getHeight());
+
+        score = 0;
+
+        playIcon = new Texture("play_button.png");
+        pauseIcon = new Texture("pause_button.png");
+        Drawable pauseDrawable = new TextureRegionDrawable(new TextureRegion(pauseIcon));
+        Drawable playDrawable = new TextureRegionDrawable(new TextureRegion(playIcon));
+
+        playButton = new ImageButton(playDrawable);
+        pauseButton = new ImageButton(pauseDrawable);
+
+
 
         Table table = new Table();
         table.columnDefaults(2);
         table.bottom().left();
         table.setFillParent(true);
         //table.setDebug(true);
-        table.add(scoreLabel).padLeft(10).width(CoronaGame.WIDTH-playButton.getWidth()-10);
-        table.add(playButton);
+        table.add(pauseButton);
         stage.addActor(table);
+
     }
 
     public void setScore(int score){
-        scoreLabel.setText("Score: "+score);
+        this.score = score;
     }
 
+    public Matrix4 getProjection(){
+        return normalProjection;
+    }
     public Stage getStage() { return stage; }
 
     public void dispose(){

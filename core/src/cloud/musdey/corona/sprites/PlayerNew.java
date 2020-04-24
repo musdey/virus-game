@@ -7,24 +7,23 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector3;
 
-public class Player {
+public class PlayerNew {
 
     private Rectangle bounds;
-    private static final int GRAVITY = -15;
-    private static final int MOVEMENT = 100;
+    private static final int GRAVITY = -1;
+    private static final float MOVEMENT = 2.5f;
     private Vector3 position;
     private Vector3 velocity;
-    private Texture player,texture;
+    private Texture texture;
     private Animation playerAnimation;
     private Sound sound;
 
-    public Player(int x, int y){
+    public PlayerNew(int x, int y){
         position = new Vector3(x,y,0);
         velocity = new Vector3(0,0,0);
-        player = new Texture("bird.png");
-        texture = new Texture("birdanimation.png");
-        playerAnimation = new Animation(new TextureRegion(texture),3,0.5f);
-        bounds = new Rectangle(x+0.1f,y+0.1f,(texture.getWidth()/3)-0.2f,texture.getHeight()-0.2f);
+        texture = new Texture("handanimation.png");
+        playerAnimation = new Animation(new TextureRegion(texture),4,0.5f);
+        bounds = new Rectangle(x+0.5f,y+0.5f,0.5f,0.5f);
         sound = Gdx.audio.newSound(Gdx.files.internal("sfx_wing.ogg"));
     }
 
@@ -41,7 +40,7 @@ public class Player {
         }
 
         velocity.scl(1/dt);
-        bounds.setPosition(position.x,position.y);
+        bounds.setPosition(position.x+0.5f,position.y+0.5f);
     }
 
     public Vector3 getPosition() {
@@ -53,7 +52,7 @@ public class Player {
     }
 
     public void jump(){
-        velocity.y = 250;
+        velocity.y = 16;
         sound.play(0.3f);
     }
 

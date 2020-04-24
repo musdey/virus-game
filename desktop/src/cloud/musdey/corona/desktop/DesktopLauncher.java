@@ -11,6 +11,6 @@ public class DesktopLauncher {
 		config.width = 576;
 		config.height = 1024;
 		config.title = CoronaGame.TITLE;
-		new LwjglApplication(new CoronaGame(), config);
+		new LwjglApplication(new CoronaGame(null), config);
 	}
 }
