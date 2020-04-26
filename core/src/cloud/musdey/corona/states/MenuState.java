@@ -1,6 +1,8 @@
 package cloud.musdey.corona.states;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -17,25 +19,27 @@ import com.badlogic.gdx.utils.viewport.FillViewport;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 
-import static cloud.musdey.corona.states.ExamplePlayState.VISIBLE_HEIGHT;
-import static cloud.musdey.corona.states.ExamplePlayState.VISIBLE_WIDTH;
+import cloud.musdey.corona.config.Config;
 
 public class MenuState extends State {
 
-    private Texture background;
+    private Texture background,pixmapTexture;
     private TextButton gameBtn,highscoreBtn,preferenceBtn,exitBtn;
     private Stage menuStage,textStage;
     private Skin skin;
     private Viewport bgViewport;
+    private Pixmap pixmap;
 
-    BitmapFont font;
-    float imageRatio,realImageWidth;
-    FreeTypeFontGenerator generator;
-    private  int row_height,col_width;
+    private BitmapFont font,buttonFont;
+    float imageRatio;
+    private FreeTypeFontGenerator generator;
+    private int row_height,col_width;
 
     private Matrix4 normalProjection;
 
-    public MenuState(GameStateManager gsm){
+    private TextButton.TextButtonStyle textButtonStyle;
+
+    public MenuState(StateManager gsm){
         super(gsm);
 
         row_height = Gdx.graphics.getWidth() / 14;
@@ -45,33 +49,58 @@ public class MenuState extends State {
 
         background = new Texture("virus_original.png");
         imageRatio = (float)background.getWidth()/(float)background.getHeight();
-//        realImageWidth = VISIBLE_HEIGHT * imageRatio;
 
-        cam.setToOrtho(false,VISIBLE_WIDTH,VISIBLE_WIDTH*aspectRatio);
-        cam.position.set(VISIBLE_HEIGHT*imageRatio/2, VISIBLE_HEIGHT/2,0);
+        cam.setToOrtho(false, Config.VISIBLE_WIDTH,Config.VISIBLE_WIDTH*aspectRatio);
+        cam.position.set(Config.VISIBLE_HEIGHT*imageRatio/2, Config.VISIBLE_HEIGHT/2,0);
 
-        bgViewport = new FillViewport(VISIBLE_HEIGHT/aspectRatio,VISIBLE_HEIGHT,cam);
+        bgViewport = new FillViewport(Config.VISIBLE_HEIGHT/aspectRatio,Config.VISIBLE_HEIGHT,cam);
         bgViewport.setScreenBounds(0,0,Gdx.graphics.getWidth(),Gdx.graphics.getHeight());
         bgViewport.apply();
 
         cam.update();
 
-        skin = new Skin(Gdx.files.internal("skins/flat-earth/skin/flat-earth-ui.json"));
-
-        setupTitle();
+        setupText();
+        setupButtonSkin();
         setupMenu();
     }
 
-    private void setupTitle(){
+    private void setupText(){
 
         textStage = new Stage(new ScreenViewport());
-        generator = new FreeTypeFontGenerator(Gdx.files.internal("fonts/flightcorps/flightcorps3d.ttf"));
+        generator = new FreeTypeFontGenerator(Gdx.files.internal("fonts/orbitron/Orbitron-Bold.ttf"));
         FreeTypeFontGenerator.FreeTypeFontParameter parameter = new FreeTypeFontGenerator.FreeTypeFontParameter();
-        parameter.size = 100;
-        font = generator.generateFont(parameter); // font size 12
+        parameter.size = Config.TITLE_SIZE;
+        font = generator.generateFont(parameter);
+        font.setColor(Color.valueOf(Config.COLOR_FONT));
+
         generator.dispose();
         normalProjection = new Matrix4().setToOrtho2D(0, 0, Gdx.graphics.getWidth(),  Gdx.graphics.getHeight());
+    }
 
+    private void setupButtonSkin(){
+        skin = new Skin();
+
+        pixmap = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
+        pixmap.setColor(Color.WHITE);
+        pixmap.fill();
+        pixmapTexture = new Texture(pixmap);
+        skin.add("white", pixmapTexture);
+
+        generator = new FreeTypeFontGenerator(Gdx.files.internal("fonts/orbitron/Orbitron-Regular.ttf"));
+        FreeTypeFontGenerator.FreeTypeFontParameter paramButton = new FreeTypeFontGenerator.FreeTypeFontParameter();
+        paramButton.size = Config.BUTTON_SIZE;
+        buttonFont = generator.generateFont(paramButton);
+        buttonFont.setColor(Color.valueOf(Config.COLOR_FONT));
+        generator.dispose();
+        skin.add("default", buttonFont);
+
+        textButtonStyle = new TextButton.TextButtonStyle();
+        textButtonStyle.up = skin.newDrawable("white", Color.valueOf(Config.COLOR_BLUE_WORLD));
+        textButtonStyle.down = skin.newDrawable("white", Color.valueOf(Config.COLOR_BLUE_WORLD2));
+        textButtonStyle.checked = skin.newDrawable("white", Color.valueOf(Config.COLOR_BLUE_WORLD2));
+        textButtonStyle.over = skin.newDrawable("white", Color.valueOf(Config.COLOR_BLUE_WORLD2));
+        textButtonStyle.font = skin.getFont("default");
+        skin.add("default", textButtonStyle);
     }
 
     private void setupMenu(){
@@ -85,17 +114,13 @@ public class MenuState extends State {
         menuStage.addActor(table);
 
         gameBtn = new TextButton("Start Game",skin);
-        gameBtn.setSize(col_width*6,row_height*1.5f);
-        gameBtn.getLabel().setFontScale(1.0f);
+        gameBtn.setSize(col_width*8,row_height*1.5f);
         highscoreBtn = new TextButton("Highscore",skin);
-        highscoreBtn.setSize(col_width*6,row_height*1.5f);
-        highscoreBtn.getLabel().setFontScale(1.0f);
-        preferenceBtn = new TextButton("Settings",skin);
-        preferenceBtn.setSize(col_width*6,row_height*1.5f);
-        preferenceBtn.getLabel().setFontScale(1.0f);
+        highscoreBtn.setSize(col_width*8,row_height*1.5f);
+//        preferenceBtn = new TextButton("Settings",skin);
+//        preferenceBtn.setSize(col_width*6,row_height*1.5f);
         exitBtn = new TextButton("Exit",skin);
-        exitBtn.setSize(col_width*6,row_height*1.5f);
-        exitBtn.getLabel().setFontScale(1.0f);
+        exitBtn.setSize(col_width*8,row_height*1.5f);
 
         table.setPosition(Gdx.graphics.getWidth()/2,row_height*3.0f);
         table.add(gameBtn).width(gameBtn.getWidth()).height(gameBtn.getHeight());
@@ -107,7 +132,7 @@ public class MenuState extends State {
         gameBtn.addListener(new ClickListener(){
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                gsm.set(new ExamplePlayState(gsm));
+                gsm.set(new GameState(gsm));
             }
         });
 
@@ -137,16 +162,20 @@ public class MenuState extends State {
     @Override
     public void render(SpriteBatch sb) {
         sb.setProjectionMatrix(cam.combined);
+
         cam.update();
+
         sb.begin();
-        sb.draw(background, 0,0, VISIBLE_HEIGHT*imageRatio, VISIBLE_HEIGHT);
+        sb.draw(background, 0,0, Config.VISIBLE_HEIGHT*imageRatio, Config.VISIBLE_HEIGHT);
         sb.end();
 
         sb.setProjectionMatrix(normalProjection);
         sb.begin();
-        font.draw(sb,"The Virus Game",0,Gdx.graphics.getHeight()-Gdx.graphics.getHeight()/16,Gdx.graphics.getWidth(), Align.center,true);
+        font.draw(sb,Config.TITLE,0,Gdx.graphics.getHeight()-Gdx.graphics.getHeight()/16,Gdx.graphics.getWidth(), Align.center,true);
         sb.end();
+
         cam.update();
+
         menuStage.act(Math.min(Gdx.graphics.getDeltaTime(), 1 / 30f));
         menuStage.draw();
     }

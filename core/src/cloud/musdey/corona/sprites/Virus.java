@@ -21,8 +21,7 @@ public class Virus {
       virus = new Texture("virus_mad.png");
       virusArray = new Array<Vector2>();
       rand = new Random();
-      int holeBottom  = 2+rand.nextInt((8-2)/2) *2;
-
+      int holeBottom  = 2+rand.nextInt((12-2)/2) *2;
       for(int i=0 ; i<VIRUS_COUNT*2; i= i+VIRUS_SIZE){
           if(i==holeBottom) {
               boundsBottom = new Rectangle(x,0,VIRUS_SIZE,holeBottom);
@@ -55,7 +54,8 @@ public class Virus {
 
     public void reposition(float x){
         virusArray.clear();
-        int holeBottom  = 2+rand.nextInt((8-2)/2) *2;
+        int holeBottom  = 2+rand.nextInt((12-2)/2) *2;
+
         for(int i=0 ; i<VIRUS_COUNT*2; i= i+VIRUS_SIZE){
             if(i==holeBottom) {
                 boundsBottom = new Rectangle(x,0,VIRUS_SIZE,holeBottom);

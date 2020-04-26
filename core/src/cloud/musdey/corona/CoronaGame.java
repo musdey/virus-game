@@ -5,37 +5,37 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 
-import cloud.musdey.corona.admob.AdsController;
-import cloud.musdey.corona.states.ExamplePlayState;
-import cloud.musdey.corona.states.GameStateManager;
+import cloud.musdey.corona.config.Config;
+import cloud.musdey.corona.mobile.AdsController;
+import cloud.musdey.corona.mobile.ShareController;
+import cloud.musdey.corona.states.StateManager;
 import cloud.musdey.corona.states.MenuState;
 
 public class CoronaGame extends ApplicationAdapter {
 
-    public static final int WIDTH = 450;
-    public static final int HEIGHT = 800;
-    public static final String TITLE = "Corona Game";
+    public static final String TITLE = Config.TITLE;
     public static int GAMECOUNTER;
 
-    private GameStateManager gsm;
+    private StateManager gsm;
     private SpriteBatch batch;
 
     private Music music;
     public static AdsController adsController;
+    public static ShareController shareController;
 
-    public CoronaGame(AdsController adsController){
+    public CoronaGame(AdsController adsController, ShareController shareController){
+        this.shareController = shareController;
         this.adsController = adsController;
     }
 
     @Override
     public void create() {
         //Gdx.gl.glClearColor(1,0,0,1);
-        gsm = new GameStateManager();
+        gsm = new StateManager();
         batch = new SpriteBatch();
-        music = Gdx.audio.newMusic(Gdx.files.internal("bensound-summer.mp3"));
-        music.setLooping(true);
-        music.setVolume(0.5f);
-        GAMECOUNTER = 0;
+        //music = Gdx.audio.newMusic(Gdx.files.internal("bensound-summer.mp3"));
+        //music.setLooping(true);
+        //music.setVolume(0.5f);
         //music.play();
         gsm.push(new MenuState(gsm));
     }
@@ -48,7 +48,7 @@ public class CoronaGame extends ApplicationAdapter {
     @Override
     public void dispose() {
         super.dispose();
-        music.dispose();
+        //music.dispose();
         batch.dispose();
     }
 }

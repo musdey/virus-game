@@ -1,5 +1,6 @@
 package cloud.musdey.corona;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,13 +13,11 @@ import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdSize;
 import com.google.android.gms.ads.AdView;
 import com.google.android.gms.ads.InterstitialAd;
-import com.google.android.gms.ads.MobileAds;
-import com.google.android.gms.ads.initialization.InitializationStatus;
-import com.google.android.gms.ads.initialization.OnInitializationCompleteListener;
 
-import cloud.musdey.corona.admob.AdsController;
+import cloud.musdey.corona.mobile.AdsController;
+import cloud.musdey.corona.mobile.ShareController;
 
-public class AndroidLauncher extends AndroidApplication implements AdsController {
+public class AndroidLauncher extends AndroidApplication implements AdsController, ShareController {
 
 	private static final String BANNER_AD_UNIT_ID = "ca-app-pub-3940256099942544/6300978111";
 	private static final String INTERSTITIAL_AD_UNIT_ID = "ca-app-pub-3940256099942544/1033173712";
@@ -31,7 +30,7 @@ public class AndroidLauncher extends AndroidApplication implements AdsController
 		super.onCreate(savedInstanceState);
 		AndroidApplicationConfiguration config = new AndroidApplicationConfiguration();
 		//initialize(new CoronaGame(), config);
-		View gameView = initializeForView(new CoronaGame(this), config);
+		View gameView = initializeForView(new CoronaGame(this,this), config);
 		setupAds();
 		RelativeLayout layout = new RelativeLayout(this);
 		layout.addView(gameView, ViewGroup.LayoutParams.MATCH_PARENT,
@@ -143,5 +142,16 @@ public class AndroidLauncher extends AndroidApplication implements AdsController
 				bannerAd.setVisibility(View.INVISIBLE);
 			}
 		});
+	}
+
+	@Override
+	public void shareWithFriends(String data) {
+		Intent sendIntent = new Intent();
+		sendIntent.setAction(Intent.ACTION_SEND);
+		sendIntent.putExtra(Intent.EXTRA_TEXT, data);
+		sendIntent.setType("text/plain");
+
+		Intent shareIntent = Intent.createChooser(sendIntent, null);
+		startActivity(shareIntent);
 	}
 }

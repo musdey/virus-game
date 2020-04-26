@@ -1,35 +1,90 @@
 package cloud.musdey.corona.states;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Preferences;
+import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
+import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 
 import cloud.musdey.corona.CoronaGame;
+import cloud.musdey.corona.config.Config;
 
 public class GameMenuState extends State{
 
     private TextButton gameBtn,highscoreBtn,exitBtn;
-    private Texture background;
-    private Texture playBtn;
+    private Texture background,pixmapTexture;
+    private Pixmap pixmap;
     private Stage stage;
     private Skin skin;
+    private BitmapFont font,buttonFont;
+    private FreeTypeFontGenerator generator;
+    private Matrix4 normalProjection;
+    private Preferences prefs;
+    private int points;
+    private TextButton.TextButtonStyle textButtonStyle;
 
-    public GameMenuState(GameStateManager gsm){
+    public GameMenuState(StateManager gsm){
         super(gsm);
-        cam.setToOrtho(false,ExamplePlayState.VISIBLE_WIDTH,ExamplePlayState.VISIBLE_HEIGHT);
+        cam.setToOrtho(false, Config.VISIBLE_WIDTH, Config.VISIBLE_HEIGHT);
         background = new Texture("bg_plain169.png");
-        playBtn = new Texture("playbtn.png");
 
-        skin = new Skin(Gdx.files.internal("skins/comic/skin/comic-ui.json"));
+        setupText();
+        setupButtonSkin();
         setupMenu();
+
+        prefs = Gdx.app.getPreferences("corona");
+        points = prefs.getInteger(Config.PREFS_CURRENTSCORE);
         CoronaGame.adsController.showBannerAd();
+    }
+
+    private void setupText(){
+
+        generator = new FreeTypeFontGenerator(Gdx.files.internal("fonts/orbitron/Orbitron-Bold.ttf"));
+        FreeTypeFontGenerator.FreeTypeFontParameter parameter = new FreeTypeFontGenerator.FreeTypeFontParameter();
+        parameter.size = Config.HIGHSCORE_SIZE;
+        font = generator.generateFont(parameter); // font size 12
+        font.setColor(Color.valueOf(Config.COLOR_FONT));
+        generator.dispose();
+        normalProjection = new Matrix4().setToOrtho2D(0, 0, Gdx.graphics.getWidth(),  Gdx.graphics.getHeight());
+
+    }
+    private void setupButtonSkin(){
+        skin = new Skin();
+
+        pixmap = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
+        pixmap.setColor(Color.WHITE);
+        pixmap.fill();
+        pixmapTexture = new Texture(pixmap);
+        skin.add("white", pixmapTexture);
+
+        generator = new FreeTypeFontGenerator(Gdx.files.internal("fonts/orbitron/Orbitron-Regular.ttf"));
+        FreeTypeFontGenerator.FreeTypeFontParameter paramButton = new FreeTypeFontGenerator.FreeTypeFontParameter();
+        paramButton.size = Config.BUTTON_SIZE;
+        buttonFont = generator.generateFont(paramButton);
+        buttonFont.setColor(Color.valueOf(Config.COLOR_FONT));
+        generator.dispose();
+        skin.add("default", buttonFont);
+
+        textButtonStyle = new TextButton.TextButtonStyle();
+        textButtonStyle.up = skin.newDrawable("white", Color.valueOf(Config.COLOR_BLUE_WORLD));
+        textButtonStyle.down = skin.newDrawable("white", Color.valueOf(Config.COLOR_BLUE_WORLD2));
+        textButtonStyle.checked = skin.newDrawable("white", Color.valueOf(Config.COLOR_BLUE_WORLD2));
+        textButtonStyle.over = skin.newDrawable("white", Color.valueOf(Config.COLOR_BLUE_WORLD2));
+        textButtonStyle.font = skin.getFont("default");
+        skin.add("default", textButtonStyle);
     }
 
     private void setupMenu(){
@@ -47,13 +102,10 @@ public class GameMenuState extends State{
 
         gameBtn = new TextButton("Try Again",skin);
         gameBtn.setSize(col_width*8,row_height*1.5f);
-        gameBtn.getLabel().setFontScale(1.5f);
         highscoreBtn = new TextButton("Highscore",skin);
         highscoreBtn.setSize(col_width*8,row_height*1.5f);
-        highscoreBtn.getLabel().setFontScale(1.5f);
         exitBtn = new TextButton("Main Menu",skin);
         exitBtn.setSize(col_width*8,row_height*1.5f);
-        exitBtn.getLabel().setFontScale(1.5f);
 
         table.setPosition(Gdx.graphics.getWidth()/2,row_height*3.0f);
         table.add(gameBtn).width(gameBtn.getWidth()).height(gameBtn.getHeight());
@@ -71,7 +123,7 @@ public class GameMenuState extends State{
                     CoronaGame.GAMECOUNTER = 0;
                 }else{
                     CoronaGame.GAMECOUNTER++;
-                    gsm.set(new ExamplePlayState(gsm));
+                    gsm.set(new GameState(gsm));
                 }
             }
         });
@@ -89,27 +141,35 @@ public class GameMenuState extends State{
                 gsm.set(new MenuState(gsm));
             }
         });
-
     }
 
     @Override
     public void handleInput() {
-
     }
 
     @Override
     public void update(float dt) {
-
     }
 
     @Override
     public void render(SpriteBatch sb) {
+
+        Gdx.gl.glClearColor(0.97265625f,0.87109375f, 0.515625f,1);
+        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+
         sb.setProjectionMatrix(cam.combined);
         sb.begin();
-        sb.draw(background,0,0, ExamplePlayState.VISIBLE_WIDTH,ExamplePlayState.VISIBLE_HEIGHT);
+        //sb.draw(background,0,0, ExamplePlayState.VISIBLE_WIDTH,ExamplePlayState.VISIBLE_HEIGHT);
         //sb.draw(playBtn, cam.position.x - playBtn.getWidth()/2,cam.position.y);
         sb.end();
 
+
+        sb.setProjectionMatrix(normalProjection);
+        sb.begin();
+        font.draw(sb,"Your score:",0,Gdx.graphics.getHeight()-Gdx.graphics.getHeight()/4,Gdx.graphics.getWidth(), Align.center,true);
+        font.draw(sb,""+points,0,Gdx.graphics.getHeight()-Gdx.graphics.getHeight()/3,Gdx.graphics.getWidth(), Align.center,true);
+        sb.end();
+        cam.update();
         stage.act(Math.min(Gdx.graphics.getDeltaTime(), 1 / 30f));
         stage.draw();
     }
@@ -117,8 +177,9 @@ public class GameMenuState extends State{
     @Override
     public void dispose() {
         background.dispose();
+        font.dispose();
         stage.dispose();
-        playBtn.dispose();
+
         CoronaGame.adsController.hideBannerAd();
         CoronaGame.adsController.hideInterstitialAd();
     }
