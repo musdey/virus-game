@@ -105,14 +105,16 @@ public class GameState extends State {
         if(Gdx.input.justTouched()){
             if(isPauseClicked()){
                 if(state == State.Running){
-                    currentPauseTexture = pauseButton;
+                    currentPauseTexture = playButton;
                     state = State.Paused;
                 }else{
-                    currentPauseTexture = playButton;
+                    currentPauseTexture = pauseButton;
                     state = State.Running;
                 }
             }else{
-                player.jump();
+                if(state == State.Running){
+                    player.jump();
+                }
             }
         }
     }
@@ -122,7 +124,6 @@ public class GameState extends State {
         int y = Gdx.input.getY();
 
         if(x > Gdx.graphics.getWidth()-iconSize && y < iconSize){
-            System.out.println("pause pressed !!!");
             return true;
         }
         return false;
@@ -224,7 +225,7 @@ public class GameState extends State {
         //Secondly draw the Hud
         hudBatch.setProjectionMatrix(normalProjection);
         hudBatch.begin();
-        hudBatch.draw(currentPauseTexture,Gdx.graphics.getWidth()-iconSize,Gdx.graphics.getHeight()-iconSize,iconSize,iconSize);
+        hudBatch.draw(currentPauseTexture,Gdx.graphics.getWidth()-iconSize*1.1f,Gdx.graphics.getHeight()-iconSize*1.1f,iconSize,iconSize);
         font.draw(hudBatch,"Score: "+points,0,Gdx.graphics.getHeight()-iconSize,Gdx.graphics.getWidth(), Align.center,true);
         hudBatch.end();
     }

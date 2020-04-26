@@ -19,8 +19,8 @@ import cloud.musdey.corona.mobile.ShareController;
 
 public class AndroidLauncher extends AndroidApplication implements AdsController, ShareController {
 
-	private static final String BANNER_AD_UNIT_ID = "ca-app-pub-3940256099942544/6300978111";
-	private static final String INTERSTITIAL_AD_UNIT_ID = "ca-app-pub-3940256099942544/1033173712";
+	private static final String BANNER_AD_UNIT_ID = "ca-app-pub-8800723866934319/7028190316";
+	private static final String INTERSTITIAL_AD_UNIT_ID = "ca-app-pub-8800723866934319/4248455059";
 
 	AdView bannerAd;
 	InterstitialAd interstitialAd;
