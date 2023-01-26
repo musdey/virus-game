@@ -17,16 +17,27 @@ android {
         exclude 'META-INF/robovm/ios/robovm.xml'
     }
     defaultConfig {
-        applicationId "cloud.musdey.corona"
+        applicationId "cloud.musdey.virusgame"
         minSdkVersion 16
         targetSdkVersion 29
         versionCode 1
-        versionName "1.0"
+        versionName "1.02"
     }
+
+    signingConfigs {
+        release {
+            storeFile file('../../keystore/playstore.jks')
+            storePassword "F6jke923LiZ1!2"
+            keyAlias "playstorekey"
+            keyPassword "F6jke923LiZ1!2"
+        }
+    }
+
     buildTypes {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.release
         }
     }
 }
@@ -89,7 +100,7 @@ task run(type: Exec) {
     }
 
     def adb = path + "/platform-tools/adb"
-    commandLine "$adb", 'shell', 'am', 'start', '-n', 'cloud.musdey.corona/cloud.musdey.corona.AndroidLauncher'
+    commandLine "$adb", 'shell', 'am', 'start', '-n', 'cloud.musdey.virusgame/cloud.musdey.virusgame.AndroidLauncher'
 }
 
 eclipse.project.name = appName + "-android"

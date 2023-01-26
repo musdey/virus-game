@@ -16,7 +16,7 @@
             android:name="com.google.android.gms.ads.APPLICATION_ID"
             android:value="ca-app-pub-8800723866934319~2597990714" />
         <activity
-            android:name="cloud.musdey.corona.AndroidLauncher"
+            android:name="cloud.musdey.virusgame.AndroidLauncher"
             android:label="@string/app_name" 
             android:screenOrientation="portrait"
             android:configChanges="keyboard|keyboardHidden|navigation|orientation|screenSize|screenLayout">
