@@ -5,7 +5,7 @@ Collect hand sanitizers along the way to earn extra points and boost your score!
 
 Special thanks to my sister for creating the game's delightful assets. Unfortunately, due to Google Play's restrictions, this game cannot be distributed on their platform.
 
-Just push the code and deploy from your Android Studio :)
+Just pull the code and deploy from your Android Studio :)
 
 
 ## Screenshots
